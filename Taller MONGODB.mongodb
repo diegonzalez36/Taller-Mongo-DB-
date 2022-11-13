@@ -1,0 +1,125 @@
+
+const database = 'Compañia';
+const collection = 'empleados';
+
+use(database);
+
+db.empleados.insertMany([
+  { '_id': 1, "nombre": 'Juan',   'apellido': 'Torres', 'Cargo': 'Ingeniero en jefe', 'Nomina': 10000000, 'fechadecontratación': new Date('2014-03-01T08:00:00Z'),'estado':true, "empresa": {"_id": ObjectId(11)} },
+  { '_id': 2, 'nombre': 'Brayan', 'apellido': 'Torres', 'Cargo': 'Profesor', 'Nomina': 9000000, 'fecha de contratación': new Date('2014-10-01T08:00:00Z'),'estado':true, "empresa": {"_id": ObjectId(11)} },
+  { '_id': 3, 'nombre': 'Stiven', 'apellido': 'Torres', 'Cargo': 'Lider de recursos humanos', 'Nomina': 2000000, 'fechadecontratación': new Date('2014-03-15T09:00:00Z'),'estado':true, "empresa": {"_id": ObjectId(11)}  },
+  { '_id': 4, 'nombre': 'Jesica', 'apellido': 'Perez',  'Cargo': 'Administrador', 'Nomina':3000000  , 'fechadecontratación': new Date('2014-04-04T11:21:39.736Z'),'estado':true, "empresa": {"_id": ObjectId(11)}  },
+  { '_id': 5, 'nombre': 'Viviana','apellido': 'Perez',  'Cargo': 'Software engineer', 'Nomina': 20000000, 'fechadecontratación ': new Date('2014-04-04T21:23:13.331Z'),'estado':true, "empresa": {"_id": ObjectId(14)}  },
+  { '_id': 6, 'nombre': 'Ana',    'apellido': 'Perez',  'Cargo': 'Ingeniero Químico', 'Nomina': 1500000, 'fechadecontratación ': new Date('2018-06-04T05:08:13Z'),'estado':true, "empresa": {"_id": ObjectId(11)}  },
+  { '_id': 7, 'nombre': 'Maria',  'apellido': 'Sanchez','Cargo': 'Ingeniero Industrial', 'Nomina': 1400000, 'fechadecontratación ': new Date('2019-09-10T08:43:00Z'),'estado':true, "empresa": {"_id": ObjectId(13)}  },
+  { '_id': 8, 'nombre': 'William','apellido': 'Sanchez','Cargo': 'Gerente General', 'Nomina': 50000, 'fechadecontratación ': new Date('2022-02-06T20:20:13Z'),'estado':true, "empresa": {"_id": ObjectId(11)}  },
+]);
+
+//Actividad:
+//1. Insertar un documento en la colección de empleados
+db.empleados.insertOne(
+  { '_id': 9, 'nombre': 'Diego','apellido': 'Gonzalez','Cargo': 'Desarrollador', 
+  'Nomina': 3000000, 'fechadecontratación ': new Date('2020-11-06T20:20:13Z'),'estado':true, "empresa": {"_id": ObjectId(11)}  },
+  );
+//2. Insertar dos documentos en la colección de empleados
+db.empleados.insertMany( [
+  { '_id': 10, 'nombre': 'Juan','apellido': 'Ramirez','Cargo': 'Profesor', 'Nomina': 5980000,
+   'fechadecontratación ': new Date('2020-08-06T20:20:13Z'),'estado':true, "empresa": {"_id": ObjectId(14)}  },
+  { '_id': 11, 'nombre': 'Ana','apellido': 'Ortiz','Cargo': 'Vendedor', 'Nomina': 6750000, 
+  'fechadecontratación ': new Date('2015-05-06T20:20:13Z'),'estado':true, "empresa": {"_id": ObjectId(11)}  },
+]);
+
+//3. Insertar una colección llamada empresa con los siguientes atributos del documento:
+    //a. nombre
+    //b. 'direccion' 
+    //c. telefono
+    //d. fecha de creación
+db.createCollection('empresa', {
+  validator: {
+    $jsonSchema: {
+        bsonType: "object",
+        required: ["nombre", "direccion", "telefono", "fecha de creación"],
+        properties: {
+          nombre: {
+            bsonType: 'string',
+            minLength: 1,
+            maxLength: 50
+          },
+          direccion: {
+            bsonType: 'string',
+            minLength: 1,
+            maxLength: 50
+          },
+          telefono: {
+            bsonType: 'string',
+            minLength: 1,
+            maxLength: 50
+          },
+          fechadecreación: {
+            bsonType: 'date',
+          }
+        }
+    }
+  }
+});
+//4. insertar cuatro empresas en la colección empresa    
+
+db.empresa.insertMany([
+  { '_id': 11, 'nombre': 'Compañia a', 'direccion': 'Calle 1', 'telefono': '1234567', 'fecha de creación': new Date('2013-03-01T08:00:00Z') },
+  { '_id': 12, 'nombre': 'Compañia b', 'direccion': 'Calle 2', 'telefono': '1234567', 'fecha de creación': new Date('2018-03-01T08:00:00Z') },
+  { '_id': 13, 'nombre': 'Compañia c', 'direccion': 'Calle 3', 'telefono': '1234567', 'fecha de creación': new Date('2010-03-01T08:00:00Z') },
+  { '_id': 14, 'nombre': 'Compañia d' , 'direccion': 'Calle 4', 'telefono': '1234567', 'fecha de creación': new Date('2015-03-01T08:00:00Z') },
+]);
+//5. ahora a cada documento hacer agregar otro atributo llamado empresa_id que sea el _id de la empresa
+db.empleados.updateMany(
+  {},
+  { $set: { empresa_id: 11 } }
+);
+db.empleados.updateOne(
+  { _id: 5 },
+  { $set: { empresa_id: 12 } }
+);
+
+//5. Consultar todos los empleados de la empresa x
+db.empleados.find({ empresa_id: 14 }).pretty();
+db.empleados.aggregate([
+  {$lookup: {
+    from: 'empresa',
+    localField: 'empresa_id',
+    foreignField: '_id',
+    as: 'empresa'
+  }},
+  {$match: {'empresa.nombre': 'Compañia 1'}}
+]);
+//7. eliminar todos los empleados de la empresa x
+db.empleados.deleteMany({ empresa_id: 14 });
+//8. actualizar el nombre de una empresa por "Universidad Ean"
+db.empresa.updateOne(
+  { _id: 14 },
+  { $set: { nombre: 'Universidad Ean' } }
+);
+//9. Consultar todos los empleados que su sueldo este entre $1000000 y $6000000
+db.empleados.find({ Nomina: { $gt: 1000000, $lt: 6000000 } }).pretty();
+//10. sumar todos los sueldos de los empleados de la empresa "Universidad Ean"
+db.empleados.aggregate([
+  {$lookup: {
+    from: 'empresa',
+    localField: 'empresa_id',
+    foreignField: '_id',
+    as: 'empresa'
+  }},
+  {$match: {'empresa.nombre': 'Universidad Ean'}},
+  {$group: {
+    _id: '$empresa.nombre',
+    total: { $sum: '$Nomina' }
+  }}
+]);
+//11. Modificar todos los empleados para que tengan un atributo array con comidas favoritas ["pizza","hamburguesa"...]
+db.empleados.updateMany(
+  {},
+  { $set: { comidas_favoritas: ["pizza", "hamburguesa"] } }
+);
+//12. Contar los empleados que tengan apellido Torres
+db.empleados.find({ apellido: 'Torres' }).count();
+//14. Consultar el empleado más joven
+db.empleados.find().sort({'Fecha de Contratación': -1}).limit(1);
